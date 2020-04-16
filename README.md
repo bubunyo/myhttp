@@ -9,7 +9,11 @@ by Bubunyo Nyavor.
 To install the, the golang toolchain go [here](https://golang.org/doc/install). 
 
 # Run Application
-
+1. Build application
+```bash
+go build -o myhttp
+```
+2. Run application with url as arguments
 ```bash
 ./myhttp [-parallel 3] example.com example2.com
 ```
