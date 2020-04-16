@@ -13,10 +13,12 @@ To install the, the golang toolchain go [here](https://golang.org/doc/install).
 ```bash
 go build -o myhttp
 ```
-2. Run application with url as arguments
+2. Run application with url as arguments and option flags
 ```bash
 ./myhttp [-parallel 3] example.com example2.com
 ```
+
+## Notes
 
 - The `parallel` is an optional flag  that sets the number of processes to run in parallel. It defaults to `10` if the flag is not provided.
 - The default value for maximum parallel processes is `30`. ie. If the value set in parallel exceeds the maximum parallel process value, the maximum is used.
