@@ -3,26 +3,38 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
 	"net/url"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
-const MaxProc = 30
-const DefaultProc = 10
+const (
+	MaxProc       = 30
+	DefaultProc   = 10
+	ClientTimeout = 5 * time.Second
+)
 
 func main() {
 	var proc int
 	flag.IntVar(&proc, "parallel", DefaultProc, "Number of jobs to run in parallel")
 	flag.Parse()
-	procNum := getProcNum(proc)
-	in := make(chan string)
-	out := hashWorker(procNum, in)
+	proc = getProcNum(proc)
+
+	n := Network{
+		Client: &http.Client{
+			Timeout: ClientTimeout,
+		},
+	}
+
+	job, result := NewWorkerPool(n, proc)
+
 	var wg sync.WaitGroup
 	go func() {
-		for r := range out {
+		for r := range result {
 			wg.Done()
 			fmt.Printf("%s %s\n", r.Url, r.Hash)
 		}
@@ -30,11 +42,11 @@ func main() {
 	for i := 1; i < len(os.Args); i++ {
 		if s, ok := fixUrl(os.Args[i]); ok {
 			wg.Add(1)
-			in <- s
+			job <- s
 		}
 	}
 	wg.Wait()
-	close(in)
+	close(job)
 }
 
 func fixUrl(test string) (string, bool) {
