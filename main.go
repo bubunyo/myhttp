@@ -11,12 +11,13 @@ import (
 )
 
 const MaxProc = 30
-
-var p = flag.Int("parallel", 10, "Number of jobs to run in parallel")
+const DefaultProc = 10
 
 func main() {
+	var proc int
+	flag.IntVar(&proc, "parallel", DefaultProc, "Number of jobs to run in parallel")
 	flag.Parse()
-	procNum := getProcNum()
+	procNum := getProcNum(proc)
 	in := make(chan string)
 	out := hashWorker(procNum, in)
 	var wg sync.WaitGroup
@@ -38,7 +39,8 @@ func main() {
 
 func fixUrl(test string) (string, bool) {
 	u, err := url.Parse(test)
-	if err != nil || !strings.Contains(u.String(), ".") {
+	s := u.String()
+	if err != nil || !strings.Contains(s, ".") || strings.HasSuffix(s, ".") {
 		return "", false
 	}
 	if u.Scheme == "" {
@@ -47,7 +49,7 @@ func fixUrl(test string) (string, bool) {
 	return u.String(), true
 }
 
-func getProcNum() int {
+func getProcNum(proc int) int {
 	max := MaxProc
 	v, ok := os.LookupEnv("MAX_PROC")
 	if ok {
@@ -56,8 +58,11 @@ func getProcNum() int {
 			max = m
 		}
 	}
-	if *p < max {
-		return *p
+	if proc == 0 {
+		return DefaultProc
+	}
+	if proc > 0 && proc < max {
+		return proc
 	}
 	return max
 }
