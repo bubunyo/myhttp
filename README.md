@@ -1,4 +1,4 @@
-# myhttp - fetch and hash http url responses 
+# myhttp 
 
 `myhttp` fetches a url over the network and returns an `md5` hash of the response gotten via the network call.
 
